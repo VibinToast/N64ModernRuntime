@@ -2017,6 +2017,8 @@ std::unique_ptr<recomp::mods::LiveRecompilerCodeHandle> apply_regenlist(Regenera
     N64Recomp::Context hook_context = context_from_regenerated_list(regenlist, rom);
     hook_context.set_all_reference_sections_relocatable();
     hook_context.use_lookup_for_all_function_calls = true;
+    // Calls set $ra as on hardware: a game routine may read it to find its caller (the base recomp can wrap such routines).
+    hook_context.set_ra_on_calls = true;
 
     // Regenerate the functions using the live recompiler.
     ModCodeHandleInputs handle_inputs{
