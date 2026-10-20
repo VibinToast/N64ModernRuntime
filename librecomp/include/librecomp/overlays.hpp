@@ -46,6 +46,13 @@ namespace recomp {
 
         void add_loaded_function(int32_t ram_addr, recomp_func_t* func);
 
+        // Base wrappers: the base recomp replaces a game function (wrapped) with a wrapper around a copy of the original
+        // code (original). Every call still reaches wrapped, but mods' patches and hooks are applied to original, so the
+        // base recomp's code keeps running around them.
+        void register_base_wrapper(recomp_func_t* wrapped, recomp_func_t* original);
+        // The function a mod's patch or hook applies to: the original behind a base wrapper, else func itself.
+        recomp_func_t* get_mod_target_func(recomp_func_t* func);
+
         struct BasePatchedFunction {
             size_t patch_section;
             size_t function_index;

@@ -1946,7 +1946,8 @@ std::vector<recomp::mods::ModLoadErrorDetails> build_regen_list(
                     .section_offset = function_section_offset,
                     .size = function_rom_size
                 });
-                regenlist.func_ptrs.push_back(func_entry.func);
+                // Behind a base wrapper, the regenerated code replaces the original so the wrapper keeps running.
+                regenlist.func_ptrs.push_back(recomp::overlays::get_mod_target_func(func_entry.func));
             }
 
             // Update the tracked function address.
@@ -2610,6 +2611,9 @@ recomp::mods::CodeModLoadError recomp::mods::ModContext::resolve_code_dependenci
                 return CodeModLoadError::BaseRecompConflict;
             }
         }
+
+        // Behind a base wrapper, the replacement takes the original's place so the wrapper keeps running around it.
+        to_replace = recomp::overlays::get_mod_target_func(to_replace);
 
         // Check if this function has already been replaced.
         auto find_patch_it = patched_funcs.find(to_replace);
