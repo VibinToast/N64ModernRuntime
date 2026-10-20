@@ -22,6 +22,11 @@ extern "C" {
 }
 
 extern "C" void recomp_trigger_event(uint8_t* rdram, recomp_context* ctx, uint32_t event_index) {
+    // The base recomp may trigger its events before mods are loaded, or after loading them failed: nothing to call.
+    if (event_callbacks.empty()) {
+        return;
+    }
+
     // Sanity check the event index.
     if (event_index >= event_callbacks.size()) {
         printf("Event %u triggered, but only %zu events have been registered!\n", event_index, event_callbacks.size());
