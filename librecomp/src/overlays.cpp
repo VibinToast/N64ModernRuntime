@@ -154,6 +154,20 @@ void recomp::overlays::add_loaded_function(int32_t ram, recomp_func_t* func) {
     func_map[ram] = func;
 }
 
+static std::unordered_map<recomp_func_t*, recomp_func_t*> base_wrapper_originals{};
+
+void recomp::overlays::register_base_wrapper(recomp_func_t* wrapped, recomp_func_t* original) {
+    base_wrapper_originals[wrapped] = original;
+}
+
+recomp_func_t* recomp::overlays::get_mod_target_func(recomp_func_t* func) {
+    auto find_it = base_wrapper_originals.find(func);
+    if (find_it == base_wrapper_originals.end()) {
+        return func;
+    }
+    return find_it->second;
+}
+
 void load_overlay(size_t section_table_index, int32_t ram) {
     const SectionTableEntry& section = sections_info.code_sections[section_table_index];
 
