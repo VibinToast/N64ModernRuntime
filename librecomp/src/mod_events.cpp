@@ -35,11 +35,16 @@ extern "C" void recomp_trigger_event(uint8_t* rdram, recomp_context* ctx, uint32
         ULTRAMODERN_QUICK_EXIT();
     }
 
+    // JFG PORT: an event no mod listens to costs nothing (no context copy).
+    const std::vector<EventCallback>& callbacks = event_callbacks[event_index];
+    if (callbacks.empty()) {
+        return;
+    }
+
     // Copy the initial context state to restore it after running each callback.
     recomp_context initial_context = *ctx;
 
     // Call every callback attached to the event.
-    const std::vector<EventCallback>& callbacks = event_callbacks[event_index];
     for (const EventCallback& callback : callbacks) {
         // Run the callback.
         std::visit(overloaded {
@@ -51,6 +56,15 @@ extern "C" void recomp_trigger_event(uint8_t* rdram, recomp_context* ctx, uint32
         // Restore the original context.
         *ctx = initial_context;
     }
+}
+
+// JFG PORT: lets a base recomp skip preparing an event's arguments when no mod listens to it.
+bool recomp::mods::event_has_callbacks(size_t event_index) {
+    return event_index < event_callbacks.size() && !event_callbacks[event_index].empty();
+}
+
+size_t recomp::mods::event_callback_count(size_t event_index) {
+    return event_index < event_callbacks.size() ? event_callbacks[event_index].size() : 0;
 }
 
 void recomp::mods::setup_events(size_t num_events) {
