@@ -607,7 +607,11 @@ namespace recomp {
         void setup_events(size_t num_events);
         void register_event_callback(size_t event_index, size_t mod_index, GenericFunction callback);
         void reset_events();
-        
+        // JFG PORT: whether any mod has a callback for an event (base events first, so a base event's index is its own),
+        // and how many. Read on the game thread, where events fire; mods load before the game runs.
+        bool event_has_callbacks(size_t event_index);
+        size_t event_callback_count(size_t event_index);
+
         void setup_hooks(size_t num_hook_slots);
         void set_hook_type(size_t hook_slot_index, bool is_return_hook);
         void register_hook(size_t hook_slot_index, size_t mod_index, GenericFunction callback);
