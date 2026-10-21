@@ -560,6 +560,12 @@ bool recomp::mods::is_mod_auto_enabled(const std::string& mod_id) {
     return mod_context->is_mod_auto_enabled(mod_id);
 }
 
+// JFG PORT
+std::string recomp::mods::get_func_replacement_mod(recomp_func_t* func) {
+    std::lock_guard lock{ mod_context_mutex };
+    return mod_context->get_func_replacement_mod(func);
+}
+
 const recomp::mods::ConfigSchema &recomp::mods::get_mod_config_schema(const std::string &mod_id) {
     std::lock_guard lock{ mod_context_mutex };
     return mod_context->get_mod_config_schema(mod_id);

@@ -357,6 +357,8 @@ namespace recomp {
             void enable_mod(const std::string& mod_id, bool enabled, bool trigger_save);
             bool is_mod_enabled(const std::string& mod_id);
             bool is_mod_auto_enabled(const std::string& mod_id);
+            // JFG PORT: the id of the mod that replaced (RECOMP_PATCH) a function, or empty.
+            std::string get_func_replacement_mod(recomp_func_t* func) const;
             size_t num_opened_mods();
             std::vector<ModLoadErrorDetails> load_mods(const GameEntry& game_entry, uint8_t* rdram, int32_t load_address, uint32_t& ram_used);
             void unload_mods();
@@ -636,6 +638,9 @@ namespace recomp {
         void enable_mod(const std::string& mod_id, bool enabled);
         bool is_mod_enabled(const std::string& mod_id);
         bool is_mod_auto_enabled(const std::string& mod_id);
+        // JFG PORT: the id of the loaded mod that replaced (RECOMP_PATCH) a recompiled function, or empty. Behind a base
+        // wrapper it's the wrapped function's original that mods replace; either may be passed. Valid once mods are loaded.
+        std::string get_func_replacement_mod(recomp_func_t* func);
         const ConfigSchema &get_mod_config_schema(const std::string &mod_id);
         const std::vector<char> &get_mod_thumbnail(const std::string &mod_id);
         void set_mod_config_value(size_t mod_index, const std::string &option_id, const ConfigValueVariant &value);
