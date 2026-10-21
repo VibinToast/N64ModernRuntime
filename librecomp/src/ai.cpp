@@ -1,4 +1,5 @@
 #include "recomp.h"
+#include "librecomp/addresses.hpp"
 #include <cstdio>
 #include <string>
 #include <ultramodern/ultra64.h>
@@ -25,7 +26,9 @@ extern "C" void osAiSetNextBuffer_recomp(uint8_t* rdram, recomp_context* ctx) {
         audio_buffer = (audio_buffer & 0x1FFFFFFFU) | 0x80000000U;
     }
 
-    constexpr uint32_t rdram_size = 8U * 1024U * 1024U;
+    // JFG PORT: all of the committed RDRAM (recomp::mem_size, 512 MB), not the console's 8 MB, so a mod's audio
+    // buffer in mod memory (from recomp::mod_rdram_start) plays too.
+    constexpr uint32_t rdram_size = static_cast<uint32_t>(recomp::mem_size);
     const uint32_t physical_address = audio_buffer & 0x1FFFFFFFU;
     const uint32_t byte_count = static_cast<uint32_t>(ctx->r5);
 
