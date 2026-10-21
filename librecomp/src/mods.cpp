@@ -1168,6 +1168,12 @@ bool recomp::mods::ModContext::is_mod_auto_enabled(const std::string& mod_id) {
     return auto_enabled_mods.contains(mod_id);
 }
 
+// JFG PORT
+std::string recomp::mods::ModContext::get_func_replacement_mod(recomp_func_t* func) const {
+    auto find_it = patched_funcs.find(recomp::overlays::get_mod_target_func(func));
+    return find_it != patched_funcs.end() ? find_it->second.mod_id : std::string{};
+}
+
 size_t recomp::mods::ModContext::num_opened_mods() {
     return opened_mods.size();
 }
