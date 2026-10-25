@@ -357,6 +357,9 @@ namespace recomp {
             void enable_mod(const std::string& mod_id, bool enabled, bool trigger_save);
             bool is_mod_enabled(const std::string& mod_id);
             bool is_mod_auto_enabled(const std::string& mod_id);
+            // JFG PORT: for this run only, enable exactly these mods (and their dependencies) instead of the saved
+            // list, and never write mods.json. Call before the mods are scanned.
+            void set_run_only_mods(const std::vector<std::string>& mod_ids);
             // JFG PORT: the id of the mod that replaced (RECOMP_PATCH) a function, or empty.
             std::string get_func_replacement_mod(recomp_func_t* func) const;
             size_t num_opened_mods();
@@ -427,6 +430,7 @@ namespace recomp {
             moodycamel::BlockingConcurrentQueue<ModConfigQueueVariant> mod_configuration_thread_queue;
             std::filesystem::path mods_config_path;
             std::filesystem::path mod_config_directory;
+            std::optional<std::unordered_set<std::string>> run_only_mods; // JFG PORT: set_run_only_mods
             mutable std::mutex mod_config_storage_mutex;
             std::vector<size_t> loaded_code_mods;
             // Code handle for vanilla code that was regenerated to add hooks.
@@ -638,6 +642,9 @@ namespace recomp {
         void enable_mod(const std::string& mod_id, bool enabled);
         bool is_mod_enabled(const std::string& mod_id);
         bool is_mod_auto_enabled(const std::string& mod_id);
+        // JFG PORT: for this run only, enable exactly these mods (and their dependencies) and leave mods.json alone.
+        // Call before the runtime starts (it scans the mods folder then).
+        void set_run_only_mods(const std::vector<std::string>& mod_ids);
         // JFG PORT: the id of the loaded mod that replaced (RECOMP_PATCH) a recompiled function, or empty. Behind a base
         // wrapper it's the wrapped function's original that mods replace; either may be passed. Valid once mods are loaded.
         std::string get_func_replacement_mod(recomp_func_t* func);

@@ -801,7 +801,10 @@ void recomp::mods::ModContext::dirty_mod_configuration_thread_process() {
                 }
             }
 
-            save_mods_config(mods_config_path, config_enabled_mods, config_mod_order);
+            // JFG PORT: a run limited to some mods (set_run_only_mods) leaves the player's saved list alone.
+            if (!run_only_mods.has_value()) {
+                save_mods_config(mods_config_path, config_enabled_mods, config_mod_order);
+            }
             pending_config_save = false;
         }
     }
@@ -890,10 +893,19 @@ void recomp::mods::ModContext::load_mods_config() {
         const std::string &mod_id = mod.manifest.mod_id;
         bool is_default_enabled = !opened_mod_is_known[i] && mod.manifest.enabled_by_default;
         bool is_manually_enabled = config_enabled_mods.contains(mod_id);
+        // JFG PORT: a run limited to some mods enables those and nothing else.
+        if (run_only_mods.has_value()) {
+            is_default_enabled = false;
+            is_manually_enabled = run_only_mods->contains(mod_id);
+        }
         if (is_default_enabled || is_manually_enabled) {
             enable_mod(mod_id, true, false);
         }
     }
+}
+
+void recomp::mods::ModContext::set_run_only_mods(const std::vector<std::string>& mod_ids) {
+    run_only_mods.emplace(mod_ids.begin(), mod_ids.end());
 }
 
 void recomp::mods::ModContext::rebuild_mod_order_lookup() {

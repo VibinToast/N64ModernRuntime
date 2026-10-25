@@ -550,6 +550,11 @@ void recomp::mods::enable_mod(const std::string& mod_id, bool enabled) {
     return mod_context->enable_mod(mod_id, enabled, true);
 }
 
+void recomp::mods::set_run_only_mods(const std::vector<std::string>& mod_ids) {
+    std::lock_guard lock { mod_context_mutex };
+    mod_context->set_run_only_mods(mod_ids);
+}
+
 bool recomp::mods::is_mod_enabled(const std::string& mod_id) {
     std::lock_guard lock { mod_context_mutex };
     return mod_context->is_mod_enabled(mod_id);
