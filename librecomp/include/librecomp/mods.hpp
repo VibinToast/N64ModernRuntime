@@ -633,6 +633,8 @@ namespace recomp {
         void initialize_mods();
         void register_embedded_mod(const std::string &mod_id, std::span<const uint8_t> mod_bytes);
         void scan_mods();
+        // JFG PORT: the Mods list (mods.json) has been read by a scan; enable_mod before then is overwritten by it.
+        bool is_mods_config_loaded();
         void close_mods();
         std::filesystem::path get_mods_directory();
         std::optional<ModDetails> get_details_for_mod(const std::string& mod_id);

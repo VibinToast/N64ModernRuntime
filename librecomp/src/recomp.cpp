@@ -95,6 +95,8 @@ void recomp::mods::register_embedded_mod(const std::string &mod_id, std::span<co
     mod_context->register_embedded_mod(mod_id, mod_bytes);
 }
 
+static std::atomic_bool mods_config_loaded = false; // JFG PORT
+
 void recomp::mods::scan_mods() {
     std::vector<recomp::mods::ModOpenErrorDetails> mod_open_errors;
     {
@@ -106,6 +108,12 @@ void recomp::mods::scan_mods() {
     }
 
     mod_context->load_mods_config();
+    mods_config_loaded.store(true); // JFG PORT
+}
+
+// JFG PORT: whether the first scan has read the Mods list (mods.json): a mod enabled before then is not kept.
+bool recomp::mods::is_mods_config_loaded() {
+    return mods_config_loaded.load();
 }
 
 void recomp::mods::close_mods() {
