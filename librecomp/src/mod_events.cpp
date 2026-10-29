@@ -58,6 +58,25 @@ extern "C" void recomp_trigger_event(uint8_t* rdram, recomp_context* ctx, uint32
     }
 }
 
+// JFG PORT: an event for one mod only: the callbacks that mod attached to it.
+extern "C" void recomp_trigger_event_for_mod(uint8_t* rdram, recomp_context* ctx, uint32_t event_index, size_t mod_index) {
+    if (event_index >= event_callbacks.size()) {
+        return;
+    }
+    const recomp_context initial_context = *ctx;
+    for (const EventCallback& callback : event_callbacks[event_index]) {
+        if (callback.mod_index != mod_index) {
+            continue;
+        }
+        std::visit(overloaded {
+            [rdram, ctx](recomp_func_t* native_func) {
+                native_func(rdram, ctx);
+            },
+        }, callback.func);
+        *ctx = initial_context;
+    }
+}
+
 // JFG PORT: lets a base recomp skip preparing an event's arguments when no mod listens to it.
 bool recomp::mods::event_has_callbacks(size_t event_index) {
     return event_index < event_callbacks.size() && !event_callbacks[event_index].empty();

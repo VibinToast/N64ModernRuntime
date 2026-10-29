@@ -686,5 +686,7 @@ namespace recomp {
 };
 
 extern "C" void recomp_trigger_event(uint8_t* rdram, recomp_context* ctx, uint32_t event_index);
+// JFG PORT: an event for one mod only (its callbacks, in order), e.g. a resource that mod registered.
+extern "C" void recomp_trigger_event_for_mod(uint8_t* rdram, recomp_context* ctx, uint32_t event_index, size_t mod_index);
 
 #endif
