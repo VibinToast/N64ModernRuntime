@@ -344,6 +344,15 @@ namespace recomp {
         typedef std::variant<ModConfigQueueSaveMod, ModConfigQueueSave, ModConfigQueueEnd> ModConfigQueueVariant;
 
         class LiveRecompilerCodeHandle;
+        // JFG PORT: where a code mod was loaded this run: its RDRAM range and the address it was linked at (its first
+        // section's), so an address in mod memory can be named (crash reports).
+        struct CodeModRange {
+            std::string mod_id;
+            uint32_t start;
+            uint32_t size;
+            uint32_t link_base;
+        };
+
         class ModContext {
         public:
             ModContext();
@@ -362,6 +371,8 @@ namespace recomp {
             void set_run_only_mods(const std::vector<std::string>& mod_ids);
             // JFG PORT: the id of the mod that replaced (RECOMP_PATCH) a function, or empty.
             std::string get_func_replacement_mod(recomp_func_t* func) const;
+            // JFG PORT: the code mods loaded this run, in load order.
+            const std::vector<CodeModRange>& get_code_mod_ranges() const { return code_mod_ranges; }
             size_t num_opened_mods();
             std::vector<ModLoadErrorDetails> load_mods(const GameEntry& game_entry, uint8_t* rdram, int32_t load_address, uint32_t& ram_used);
             void unload_mods();
@@ -391,6 +402,7 @@ namespace recomp {
             std::pair<std::string, std::string> get_mod_import_info(size_t mod_index, size_t import_index) const;
             DependencyStatus is_dependency_met(size_t mod_index, const std::string& dependency_id) const;
         private:
+            std::vector<CodeModRange> code_mod_ranges; // JFG PORT
             ModOpenError open_mod_from_manifest(ModManifest &manifest, std::string &error_param, const std::vector<ModContentTypeId> &supported_content_types, bool requires_manifest);
             ModOpenError open_mod_from_path(const std::filesystem::path& mod_path, std::string& error_param, const std::vector<ModContentTypeId>& supported_content_types, bool requires_manifest);
             ModOpenError open_mod_from_memory(std::span<const uint8_t> mod_bytes, std::string &error_param, const std::vector<ModContentTypeId> &supported_content_types, bool requires_manifest);
@@ -650,6 +662,8 @@ namespace recomp {
         // JFG PORT: the id of the loaded mod that replaced (RECOMP_PATCH) a recompiled function, or empty. Behind a base
         // wrapper it's the wrapped function's original that mods replace; either may be passed. Valid once mods are loaded.
         std::string get_func_replacement_mod(recomp_func_t* func);
+        // JFG PORT: the code mods loaded this run (their RDRAM ranges and link addresses), in load order.
+        std::vector<CodeModRange> get_code_mod_ranges();
         const ConfigSchema &get_mod_config_schema(const std::string &mod_id);
         const std::vector<char> &get_mod_thumbnail(const std::string &mod_id);
         void set_mod_config_value(size_t mod_index, const std::string &option_id, const ConfigValueVariant &value);

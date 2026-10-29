@@ -579,6 +579,12 @@ std::string recomp::mods::get_func_replacement_mod(recomp_func_t* func) {
     return mod_context->get_func_replacement_mod(func);
 }
 
+// JFG PORT
+std::vector<recomp::mods::CodeModRange> recomp::mods::get_code_mod_ranges() {
+    std::lock_guard lock{ mod_context_mutex };
+    return mod_context->get_code_mod_ranges();
+}
+
 const recomp::mods::ConfigSchema &recomp::mods::get_mod_config_schema(const std::string &mod_id) {
     std::lock_guard lock{ mod_context_mutex };
     return mod_context->get_mod_config_schema(mod_id);

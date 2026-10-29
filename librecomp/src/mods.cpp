@@ -1710,6 +1710,7 @@ std::vector<recomp::mods::ModLoadErrorDetails> recomp::mods::ModContext::load_mo
     base_event_indices.resize(opened_mods.size());
 
     // Parse the code mods and load their binary data.
+    code_mod_ranges.clear(); // JFG PORT
     for (size_t mod_index : loaded_code_mods) {
         uint32_t cur_ram_used = 0;
         auto& mod = opened_mods[mod_index];
@@ -1725,6 +1726,10 @@ std::vector<recomp::mods::ModLoadErrorDetails> recomp::mods::ModContext::load_mo
             }
         }
         else {
+            // JFG PORT: remember where it went (crash reports name the mod an address is in).
+            const auto& sections = mod.recompiler_context->sections;
+            code_mod_ranges.push_back({ mod.manifest.mod_id, (uint32_t)load_address, cur_ram_used,
+                                        sections.empty() ? 0u : (uint32_t)sections[0].ram_addr });
             load_address += cur_ram_used;
             ram_used += cur_ram_used;
             base_event_indices[mod_index] = static_cast<uint32_t>(base_event_index);
