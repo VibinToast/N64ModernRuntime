@@ -236,6 +236,7 @@ namespace recomp {
             std::string short_description;
             Version version;
             std::vector<std::string> authors;
+            std::vector<std::string> tags; // categories for mod lists (optional, may be empty)
             std::vector<Dependency> dependencies;
             bool runtime_toggleable;
             bool enabled_by_default;
@@ -250,6 +251,7 @@ namespace recomp {
             std::string description;
             std::string short_description;
             std::vector<std::string> authors;
+            std::vector<std::string> tags;
             std::vector<Dependency> dependencies;
             std::unordered_map<std::string, size_t> dependencies_by_id;
             ConfigSchema config_schema;
@@ -526,6 +528,7 @@ namespace recomp {
                     .short_description = manifest.short_description,
                     .version = manifest.version,
                     .authors = manifest.authors,
+                    .tags = manifest.tags,
                     .dependencies = manifest.dependencies,
                     .runtime_toggleable = is_runtime_toggleable(),
                     .enabled_by_default = manifest.enabled_by_default

@@ -178,6 +178,7 @@ const std::string description_key = "description";
 const std::string short_description_key = "short_description";
 const std::string version_key = "version";
 const std::string authors_key = "authors";
+const std::string tags_key = "tags";
 const std::string minimum_recomp_version_key = "minimum_recomp_version";
 const std::string enabled_by_default_key = "enabled_by_default";
 const std::string dependencies_key = "dependencies";
@@ -575,6 +576,12 @@ recomp::mods::ModOpenError recomp::mods::parse_manifest(ModManifest& ret, const 
 
     // Authors
     current_error = try_get_vec<json::string_t>(ret.authors, manifest_json, authors_key, true, error_param);
+    if (current_error != ModOpenError::Good) {
+        return current_error;
+    }
+
+    // Tags (optional)
+    current_error = try_get_vec<json::string_t>(ret.tags, manifest_json, tags_key, false, error_param);
     if (current_error != ModOpenError::Good) {
         return current_error;
     }
