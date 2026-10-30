@@ -1,6 +1,9 @@
 #ifndef __RECOMP_GAME__
 #define __RECOMP_GAME__
 
+#include <algorithm>
+#include <compare>
+#include <string>
 #include <vector>
 #include <filesystem>
 
@@ -50,15 +53,60 @@ namespace recomp {
 
         static bool from_string(const std::string& str, Version& out);
 
-        auto operator<=>(const Version& rhs) const {
+        std::strong_ordering operator<=>(const Version& rhs) const {
             if (major != rhs.major) {
                 return major <=> rhs.major;
             }
             if (minor != rhs.minor) {
                 return minor <=> rhs.minor;
             }
-            return patch <=> rhs.patch;
-        } 
+            if (patch != rhs.patch) {
+                return patch <=> rhs.patch;
+            }
+            return compare_prerelease(suffix, rhs.suffix);
+        }
+
+        // JFG PORT: as semver orders them, a prerelease ("-test.4") comes before its release, so 1.4.0-test.4 < 1.4.0
+        // (a mod that needs 1.4.0 does not load on a test build of it), and test.9 < test.10. "+..." is ignored.
+        static std::strong_ordering compare_prerelease(const std::string& a_suffix, const std::string& b_suffix) {
+            auto prerelease = [](const std::string& s) {
+                if (s.empty() || s[0] != '-') return std::string();
+                return s.substr(1, s.find('+') == std::string::npos ? std::string::npos : s.find('+') - 1);
+            };
+            const std::string a = prerelease(a_suffix), b = prerelease(b_suffix);
+            if (a.empty() || b.empty()) {
+                return a.empty() <=> b.empty(); // a release is above its prereleases
+            }
+            for (size_t i = 0, j = 0;;) {
+                if (i > a.size() || j > b.size()) {
+                    return (i <= a.size()) <=> (j <= b.size()); // fewer parts first
+                }
+                size_t ie = a.find('.', i), je = b.find('.', j);
+                if (ie == std::string::npos) ie = a.size();
+                if (je == std::string::npos) je = b.size();
+                const std::string x = a.substr(i, ie - i), y = b.substr(j, je - j);
+                const bool xn = !x.empty() && x.find_first_not_of("0123456789") == std::string::npos;
+                const bool yn = !y.empty() && y.find_first_not_of("0123456789") == std::string::npos;
+                if (xn && yn) {
+                    const std::string xs = x.substr(std::min(x.find_first_not_of('0'), x.size() - 1));
+                    const std::string ys = y.substr(std::min(y.find_first_not_of('0'), y.size() - 1));
+                    if (xs.size() != ys.size()) {
+                        return xs.size() <=> ys.size();
+                    }
+                    if (xs != ys) {
+                        return xs.compare(ys) <=> 0;
+                    }
+                }
+                else if (xn != yn) {
+                    return yn <=> xn; // a number before a word
+                }
+                else if (x != y) {
+                    return x.compare(y) <=> 0;
+                }
+                i = ie + 1;
+                j = je + 1;
+            }
+        }
     };
     enum class RomValidationError {
         Good,
